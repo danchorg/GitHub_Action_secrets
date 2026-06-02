@@ -18,7 +18,7 @@ jobs:
   deploy-staging:
     needs: build
     runs-on: ubuntu-latest
-    # TODO: Add environment 'staging' (no protection rules — auto deploy)
+    environment: staging
     steps:
       - name: Deploy to staging
         run: echo "Deployed to staging"
@@ -32,16 +32,24 @@ jobs:
           echo "Running smoke tests..."
           echo "All tests passed"
 
-  # TODO: Add an 'approve-production' job
-  # - needs: test-staging
-  # - environment: production-approval (with required reviewer + wait timer)
-  # - steps: echo a confirmation
 
-  deploy-production:
-    # TODO: Change needs to approve-production
+  approve-production:
     needs: test-staging
     runs-on: ubuntu-latest
-    # TODO: Add environment 'production' with URL
+    environment: production-approval  
+    steps:
+      - name: Awaiting production approval
+        run: echo "Waiting for production approval..." 
+
+
+
+  deploy-production:
+    needs: [approve-production, test-staging] 
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://production.example.com
+
     steps:
       - name: Deploy to production
         run: echo "Deployed to production"
@@ -52,4 +60,12 @@ jobs:
     steps:
       - name: Verify production
         run: echo "Production smoke tests passed"
-      # TODO: Add a Job Summary with the pipeline history
+
+      - name: Add Job Summary
+        run: |
+          echo "Pipeline History:" > $GITHUB_STEP_SUMMARY
+          echo "- Build: Success" >> $GITHUB_STEP_SUMMARY
+          echo "- Deploy to Staging: Success" >> $GITHUB_STEP_SUMMARY
+          echo "- Test Staging: Success" >> $GITHUB_STEP_SUMMARY
+          echo "- Deploy to Production: Success" >> $GITHUB_STEP_SUMMARY
+          echo "- Verify Production: Success" >> $GITHUB_STEP_SUMMARY   
