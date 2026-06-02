@@ -1,0 +1,17 @@
+name: Organization CI
+
+on:
+  push:
+    branches: [ "main" ]  # ⬅️ At runtime this will be replaced with the default branch in the repo.
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run a one-line script
+        run: echo We meet again mr Bond
